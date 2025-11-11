@@ -1,0 +1,24 @@
+// Exportar todas las entidades
+export { AlergiasMascotas } from './AlergiasMascotas';
+export { Auditoria } from './Auditoria';
+export { Cirugias } from './Cirugias';
+export { CitasMedicas } from './CitasMedicas';
+export { Clientes } from './Clientes';
+export { CondicionesCronicas } from './CondicionesCronicas';
+export { Desparacitaciones } from './Desparacitaciones';
+export { Especies } from './Especies';
+export { ExamenesLaboratorio } from './ExamenesLaboratorio';
+export { HistorialClinico } from './HistorialClinico';
+export { Mascotas } from './Mascotas';
+export { Productos } from './Productos';
+export { Razas } from './Razas';
+export { RecetaDetalle } from './RecetaDetalle';
+export { RecetasMedicas } from './RecetasMedicas';
+export { Reservas } from './Reservas';
+export { Roles } from './Roles';
+export { ServicioProductos } from './ServicioProductos';
+export { ServiciosRealizados } from './ServiciosRealizados';
+export { TipoProducto } from './TipoProducto';
+export { TipoServicios } from './TipoServicios';
+export { Usuarios } from './Usuarios';
+export { Vacunaciones } from './Vacunaciones';
