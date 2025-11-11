@@ -6,9 +6,9 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Roles } from '../entities/Roles';
-import { CreateRolDto } from '../DTO/roles/create-rol.dto';
-import { UpdateRolDto } from '../DTO/roles/update-rol.dto';
+import { Roles } from '../../entities/Roles';
+import { CreateRolDto } from '../../DTO/roles/create-rol.dto';
+import { UpdateRolDto } from '../../DTO/roles/update-rol.dto';
 
 @Injectable()
 export class RolesService {

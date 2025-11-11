@@ -17,10 +17,10 @@ import {
   ApiParam,
   ApiBearerAuth,
 } from '@nestjs/swagger';
-import { RolesService } from './roles.service';
-import { CreateRolDto } from '../DTO/roles/create-rol.dto';
-import { UpdateRolDto } from '../DTO/roles/update-rol.dto';
-import { Roles } from '../entities/Roles';
+import { RolesService } from '../../services/roles/roles.service';
+import { CreateRolDto } from '../../DTO/roles/create-rol.dto';
+import { UpdateRolDto } from '../../DTO/roles/update-rol.dto';
+import { Roles } from '../../entities/Roles';
 
 @ApiTags('Roles')
 @ApiBearerAuth()
