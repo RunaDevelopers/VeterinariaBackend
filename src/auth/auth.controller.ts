@@ -4,7 +4,7 @@ import { AuthService } from './auth.service';
 import { RegisterDto, LoginDto, AuthResponseDto } from './dto';
 import { JwtAuthGuard } from './guards';
 import { GetUser } from './decorators';
-import { User } from './entities/user.entity';
+import { Usuarios } from '../entities/Usuarios';
 
 @ApiTags('Autenticación')
 @Controller('auth')
@@ -75,16 +75,24 @@ export class AuthController {
     status: 401,
     description: 'No autorizado - Token inválido o ausente',
   })
-  async getProfile(@GetUser() user: User) {
+  async getProfile(@GetUser() usuario: Usuarios) {
     return {
-      id: user.id,
-      email: user.email,
-      nombre: user.nombre,
-      apellido: user.apellido,
-      telefono: user.telefono,
-      rol: user.rol,
-      isActive: user.isActive,
-      createdAt: user.createdAt,
+      idUsuario: usuario.idUsuario,
+      username: usuario.username,
+      email: usuario.email,
+      nombres: usuario.nombres,
+      apellidos: usuario.apellidos,
+      telefono: usuario.telefono,
+      documentoIdentidad: usuario.documentoIdentidad,
+      tipoDocumento: usuario.tipoDocumento,
+      direccion: usuario.direccion,
+      especialidad: usuario.especialidad,
+      numeroColegiatura: usuario.numeroColegiatura,
+      idRol: usuario.idRol,
+      nombreRol: usuario.idRol2?.nombreRol,
+      activo: usuario.activo,
+      ultimoAcceso: usuario.ultimoAcceso,
+      fechaCreacion: usuario.fechaCreacion,
     };
   }
 }

@@ -3,20 +3,24 @@ import {
   ConflictException,
   UnauthorizedException,
   InternalServerErrorException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
-import { User } from './entities/user.entity';
+import { Usuarios } from '../entities/Usuarios';
+import { Roles } from '../entities/Roles';
 import { RegisterDto, LoginDto, AuthResponseDto } from './dto';
 import { JwtPayload } from './strategies/jwt.strategy';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    @InjectRepository(Usuarios)
+    private readonly usuariosRepository: Repository<Usuarios>,
+    @InjectRepository(Roles)
+    private readonly rolesRepository: Repository<Roles>,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -24,15 +28,33 @@ export class AuthService {
    * Registrar un nuevo usuario
    */
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
-    const { email, password, ...userData } = registerDto;
+    const { idRol, email, username, password, ...userData } = registerDto;
 
-    // Verificar si el usuario ya existe
-    const existingUser = await this.userRepository.findOne({
+    // Verificar que el rol existe
+    const rol = await this.rolesRepository.findOne({
+      where: { idRol, activo: true },
+    });
+
+    if (!rol) {
+      throw new NotFoundException('El rol especificado no existe o está inactivo');
+    }
+
+    // Verificar si el email ya existe
+    const existingEmail = await this.usuariosRepository.findOne({
       where: { email },
     });
 
-    if (existingUser) {
+    if (existingEmail) {
       throw new ConflictException('El email ya está registrado');
+    }
+
+    // Verificar si el username ya existe
+    const existingUsername = await this.usuariosRepository.findOne({
+      where: { username },
+    });
+
+    if (existingUsername) {
+      throw new ConflictException('El username ya está registrado');
     }
 
     try {
@@ -40,26 +62,30 @@ export class AuthService {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Crear el usuario
-      const user = this.userRepository.create({
+      const usuario = this.usuariosRepository.create({
+        idRol,
         email,
-        password: hashedPassword,
+        username,
+        passwordHash: hashedPassword,
         ...userData,
       });
 
-      await this.userRepository.save(user);
+      await this.usuariosRepository.save(usuario);
 
       // Generar token JWT
-      const token = this.generateToken(user);
+      const token = this.generateToken(usuario, rol);
 
       return {
         access_token: token,
         user: {
-          id: user.id,
-          email: user.email,
-          nombre: user.nombre,
-          apellido: user.apellido,
-          telefono: user.telefono,
-          rol: user.rol,
+          idUsuario: usuario.idUsuario,
+          username: usuario.username,
+          email: usuario.email,
+          nombres: usuario.nombres,
+          apellidos: usuario.apellidos,
+          telefono: usuario.telefono,
+          idRol: usuario.idRol,
+          nombreRol: rol.nombreRol,
         },
       };
     } catch (error) {
@@ -73,41 +99,48 @@ export class AuthService {
    * Iniciar sesión
    */
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
-    const { email, password } = loginDto;
+    const { username, password } = loginDto;
 
-    // Buscar usuario por email
-    const user = await this.userRepository.findOne({
-      where: { email },
+    // Buscar usuario por username con el rol relacionado
+    const usuario = await this.usuariosRepository.findOne({
+      where: { username },
+      relations: ['idRol2'],
     });
 
-    if (!user) {
+    if (!usuario) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
     // Verificar si el usuario está activo
-    if (!user.isActive) {
+    if (!usuario.activo) {
       throw new UnauthorizedException('Usuario inactivo');
     }
 
     // Verificar la contraseña
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    const isPasswordValid = await bcrypt.compare(password, usuario.passwordHash);
 
     if (!isPasswordValid) {
       throw new UnauthorizedException('Credenciales inválidas');
     }
 
+    // Actualizar último acceso
+    usuario.ultimoAcceso = new Date();
+    await this.usuariosRepository.save(usuario);
+
     // Generar token JWT
-    const token = this.generateToken(user);
+    const token = this.generateToken(usuario, usuario.idRol2);
 
     return {
       access_token: token,
       user: {
-        id: user.id,
-        email: user.email,
-        nombre: user.nombre,
-        apellido: user.apellido,
-        telefono: user.telefono,
-        rol: user.rol,
+        idUsuario: usuario.idUsuario,
+        username: usuario.username,
+        email: usuario.email,
+        nombres: usuario.nombres,
+        apellidos: usuario.apellidos,
+        telefono: usuario.telefono,
+        idRol: usuario.idRol,
+        nombreRol: usuario.idRol2?.nombreRol,
       },
     };
   }
@@ -115,26 +148,27 @@ export class AuthService {
   /**
    * Validar usuario por ID (usado por JwtStrategy)
    */
-  async validateUser(userId: string): Promise<User> {
-    const user = await this.userRepository.findOne({
-      where: { id: userId, isActive: true },
+  async validateUser(userId: string): Promise<Usuarios> {
+    const usuario = await this.usuariosRepository.findOne({
+      where: { idUsuario: userId, activo: true },
+      relations: ['idRol2'],
     });
 
-    if (!user) {
+    if (!usuario) {
       throw new UnauthorizedException('Usuario no encontrado o inactivo');
     }
 
-    return user;
+    return usuario;
   }
 
   /**
    * Generar token JWT
    */
-  private generateToken(user: User): string {
+  private generateToken(usuario: Usuarios, rol: Roles): string {
     const payload: JwtPayload = {
-      sub: user.id,
-      email: user.email,
-      rol: user.rol,
+      sub: usuario.idUsuario,
+      email: usuario.email,
+      rol: rol.nombreRol,
     };
 
     return this.jwtService.sign(payload);

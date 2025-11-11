@@ -5,6 +5,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
+import { RolesModule } from './roles/roles.module';
 
 @Module({
   imports: [
@@ -27,10 +28,16 @@ import { AuthModule } from './auth/auth.module';
         database: configService.get<string>('DB_NAME'),
         
         // Carpeta donde estarán tus entidades
-        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        entities: [
+          __dirname + '/**/*.entity{.ts,.js}',  // Entidades de auth/
+          __dirname + '/entities/**/*.{ts,js}',  // Entidades de entities/
+        ],
         
         // Solo sincronizar en desarrollo (¡cuidado en producción!)
-        synchronize: configService.get('NODE_ENV') === 'development',
+        synchronize: false, // DESACTIVADO para no alterar las tablas de Supabase
+        
+        // Migraciones automáticas desactivadas
+        migrationsRun: false,
         
         // SSL requerido por Supabase
         ssl: {
@@ -44,6 +51,9 @@ import { AuthModule } from './auth/auth.module';
 
     // 3. Módulo de autenticación
     AuthModule,
+
+    // 4. Módulo de roles
+    RolesModule,
   ],
   controllers: [AppController],
   providers: [AppService, ],

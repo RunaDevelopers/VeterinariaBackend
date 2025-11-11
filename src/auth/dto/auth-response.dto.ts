@@ -1,5 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { UserRole } from '../entities/user.entity';
 
 export class AuthResponseDto {
   @ApiProperty({
@@ -10,20 +9,25 @@ export class AuthResponseDto {
 
   @ApiProperty({
     example: {
-      id: '123e4567-e89b-12d3-a456-426614174000',
+      idUsuario: '123e4567-e89b-12d3-a456-426614174000',
+      username: 'jperez',
       email: 'usuario@veterinaria.com',
-      nombre: 'Juan',
-      apellido: 'Pérez',
-      rol: 'cliente',
+      nombres: 'Juan',
+      apellidos: 'Pérez García',
+      telefono: '+51 987654321',
+      idRol: '6a6063da-6ec4-403e-988c-05a4af86958b',
+      nombreRol: 'VETERINARIO',
     },
     description: 'Información del usuario autenticado',
   })
   user: {
-    id: string;
+    idUsuario: string;
+    username: string;
     email: string;
-    nombre: string;
-    apellido: string;
+    nombres: string;
+    apellidos: string;
     telefono: string;
-    rol: UserRole;
+    idRol: string;
+    nombreRol?: string;
   };
 }
