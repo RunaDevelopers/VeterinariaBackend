@@ -5,7 +5,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
-import { RolesModule } from './roles/roles.module';
 import { AlergiasMascotasService } from './services/alergias-mascotas/alergias-mascotas.service';
 import { AuditoriaService } from './services/auditoria/auditoria.service';
 import { CirugiasService } from './services/cirugias/cirugias.service';
@@ -29,6 +28,7 @@ import { TipoProductoService } from './services/tipo-producto/tipo-producto.serv
 import { TipoServiciosService } from './services/tipo-servicios/tipo-servicios.service';
 import { UsuariosService } from './services/usuarios/usuarios.service';
 import { VacunacionesService } from './services/vacunaciones/vacunaciones.service';
+import { RolesModule } from './modules/roles/roles.module';
 
 @Module({
   imports: [
