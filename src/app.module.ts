@@ -1,36 +1,51 @@
+// src/app.module.ts
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    // Configuración de variables de entorno
+    // 1. Configuración de variables de entorno
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-    // Configuración de la base de datos
+    
+    // 2. Configuración de TypeORM con Supabase
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         type: 'postgres',
-        host: configService.get('DB_HOST'),
-        port: configService.get('DB_PORT'),
-        username: configService.get('DB_USERNAME'),
-        password: configService.get('DB_PASSWORD'),
-        database: configService.get('DB_NAME'),
-        entities: [],
-        synchronize: configService.get('NODE_ENV') === 'development', // Solo en desarrollo
+        host: configService.get<string>('DB_HOST'),
+        port: parseInt(configService.get<string>('DB_PORT', '5432'), 10),
+        username: configService.get<string>('DB_USERNAME'),
+        password: configService.get<string>('DB_PASSWORD'),
+        database: configService.get<string>('DB_NAME'),
+        
+        // Carpeta donde estarán tus entidades
+        entities: [__dirname + '/**/*.entity{.ts,.js}'],
+        
+        // Solo sincronizar en desarrollo (¡cuidado en producción!)
+        synchronize: configService.get('NODE_ENV') === 'development',
+        
+        // SSL requerido por Supabase
         ssl: {
-          rejectUnauthorized: false, // Necesario para Supabase
+          rejectUnauthorized: false,
         },
+        
+        // Logging para ver las consultas SQL (útil para debugging)
+        logging: true,
       }),
-      inject: [ConfigService],
     }),
+
+    // 3. Módulo de autenticación
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule { }
+export class AppModule {}
