@@ -6,6 +6,8 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { AuthModule } from './auth/auth.module';
 import { RolesModule } from './modules/roles/roles.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { TipoServiciosModule } from './modules/tipo-servicios/tipo-servicios.module';
 
 @Module({
   imports: [
@@ -54,6 +56,12 @@ import { RolesModule } from './modules/roles/roles.module';
 
     // 4. Módulo de roles
     RolesModule,
+
+    // 5. Módulo de tipo de servicios
+    TipoServiciosModule,
+
+    // 6. Módulo de leads
+    LeadsModule,
   ],
   controllers: [AppController],
   providers: [AppService, ],
