@@ -17,9 +17,6 @@ export class RolesService {
     private readonly rolesRepository: Repository<Roles>,
   ) {}
 
-  /**
-   * Obtener todos los roles
-   */
   async findAll(): Promise<Roles[]> {
     try {
       return await this.rolesRepository.find({

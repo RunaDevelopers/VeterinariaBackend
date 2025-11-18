@@ -29,6 +29,8 @@ import { TipoServiciosService } from './services/tipo-servicios/tipo-servicios.s
 import { UsuariosService } from './services/usuarios/usuarios.service';
 import { VacunacionesService } from './services/vacunaciones/vacunaciones.service';
 import { RolesModule } from './modules/roles/roles.module';
+import { LeadsModule } from './modules/leads/leads.module';
+import { TipoServiciosModule } from './modules/tipo-servicios/tipo-servicios.module';
 
 @Module({
   imports: [
@@ -77,6 +79,12 @@ import { RolesModule } from './modules/roles/roles.module';
 
     // 4. Módulo de roles
     RolesModule,
+
+    // 5. Módulo de tipo de servicios
+    TipoServiciosModule,
+
+    // 6. Módulo de leads
+    LeadsModule,
   ],
   controllers: [AppController],
   providers: [AppService, AlergiasMascotasService, AuditoriaService, CirugiasService, CitasMedicasService, ClientesService, CondicionesCronicasService, DesparacitacionesService, EspeciesService, ExamenesLaboratorioService, HistorialClinicoService, MascotasService, ProductosService, RazasService, RecetaDetalleService, RecetasMedicasService, ReservasService, RolesService, ServicioProductosService, ServiciosRealizadosService, TipoProductoService, TipoServiciosService, UsuariosService, VacunacionesService, ],
