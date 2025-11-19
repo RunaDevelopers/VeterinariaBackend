@@ -94,7 +94,7 @@ export class Productos {
     precision: 10,
     scale: 2,
   })
-  precioCompra: string | null;
+  precioCompra: number | null;
 
   @Column("numeric", {
     name: "precio_venta",
@@ -102,10 +102,10 @@ export class Productos {
     precision: 10,
     scale: 2,
   })
-  precioVenta: string | null;
+  precioVenta: number | null;
 
   @Column("date", { name: "fecha_vencimiento", nullable: true })
-  fechaVencimiento: string | null;
+  fechaVencimiento: Date | null;
 
   @Column("character varying", { name: "lote", nullable: true, length: 50 })
   lote: string | null;

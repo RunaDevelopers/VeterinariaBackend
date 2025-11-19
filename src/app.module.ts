@@ -11,6 +11,7 @@ import { TipoServiciosModule } from './modules/tipo-servicios/tipo-servicios.mod
 import { ClientesModule } from './modules/clientes/clientes.module';
 import { ReservasModule } from './modules/reservas/reservas.module';
 import { TipoProductoModule } from './modules/tipo-producto/tipo-producto.module';
+import { ProductosModule } from './modules/productos/productos.module';
 import { SharedModule } from './modules/shared/shared.module';
 
 @Module({
@@ -65,6 +66,7 @@ import { SharedModule } from './modules/shared/shared.module';
     ClientesModule,
     ReservasModule,
     TipoProductoModule,
+    ProductosModule,
 
     // 5. Módulo compartido con servicios generales
     SharedModule,
