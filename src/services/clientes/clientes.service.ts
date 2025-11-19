@@ -2,10 +2,9 @@ import { BadRequestException, HttpCode, HttpStatus, Injectable } from '@nestjs/c
 import { InjectRepository } from '@nestjs/typeorm';
 import { Clientes } from 'src/entities';
 import { Repository } from 'typeorm';
-import { ClienteInterface } from '../../../dist/interfaces/cliente.interface';
 import { CreateClienteDto } from 'src/DTO';
 import { BaseResponseDto } from 'src/DTO/baseResponse/baseResponse.dto';
-import { HttpErrorByCode } from '@nestjs/common/utils/http-error-by-code.util';
+import { ClienteInterface } from 'src/interfaces/cliente.interface';
 
 @Injectable()
 export class ClientesService implements ClienteInterface {

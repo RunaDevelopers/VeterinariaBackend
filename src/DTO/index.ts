@@ -38,6 +38,10 @@ export * from './examenes-laboratorio/update-examen-laboratorio.dto';
 export * from './historial-clinico/create-historial-clinico.dto';
 export * from './historial-clinico/update-historial-clinico.dto';
 
+// Leads
+export * from './leads/create-lead.dto';
+export * from './leads/update-lead.dto';
+
 // Mascotas
 export * from './mascotas/create-mascota.dto';
 export * from './mascotas/update-mascota.dto';

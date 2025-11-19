@@ -23,15 +23,15 @@ import { TipoServiciosService } from '../../services/tipo-servicios/tipo-servici
 import { CreateTipoServicioDto } from '../../DTO/tipo-servicios/create-tipo-servicio.dto';
 import { UpdateTipoServicioDto } from '../../DTO/tipo-servicios/update-tipo-servicio.dto';
 import { TipoServicios } from '../../entities/TipoServicios';
+import { BaseResponseDto } from 'src/DTO/baseResponse/baseResponse.dto';
 
 @ApiTags('Tipo de Servicios')
 @ApiBearerAuth()
 @Controller('tipo-servicios')
 export class TipoServiciosController {
-  constructor(private readonly tipoServiciosService: TipoServiciosService) {}
+  constructor(private readonly tipoServiciosService: TipoServiciosService) { }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear un nuevo tipo de servicio',
     description:
@@ -52,7 +52,7 @@ export class TipoServiciosController {
   })
   async create(
     @Body() createTipoServicioDto: CreateTipoServicioDto,
-  ): Promise<TipoServicios> {
+  ): Promise<BaseResponseDto<TipoServicios>> {
     return this.tipoServiciosService.create(createTipoServicioDto);
   }
 
@@ -68,7 +68,7 @@ export class TipoServiciosController {
     description: 'Lista de tipos de servicios obtenida exitosamente',
     type: [TipoServicios],
   })
-  async findAll(): Promise<TipoServicios[]> {
+  async findAll(): Promise<BaseResponseDto<TipoServicios[]>> {
     return this.tipoServiciosService.findAll();
   }
 
@@ -83,7 +83,7 @@ export class TipoServiciosController {
     description: 'Lista de tipos de servicios activos obtenida exitosamente',
     type: [TipoServicios],
   })
-  async findAllActive(): Promise<TipoServicios[]> {
+  async findAllActive(): Promise<BaseResponseDto<TipoServicios[]>> {
     return this.tipoServiciosService.findAllActive();
   }
 
@@ -99,7 +99,7 @@ export class TipoServiciosController {
     description: 'Lista obtenida exitosamente',
     type: [TipoServicios],
   })
-  async findRequiereVeterinario(): Promise<TipoServicios[]> {
+  async findRequiereVeterinario(): Promise<BaseResponseDto<TipoServicios[]>> {
     return this.tipoServiciosService.findRequiereVeterinario();
   }
 
@@ -115,7 +115,7 @@ export class TipoServiciosController {
     description: 'Lista obtenida exitosamente',
     type: [TipoServicios],
   })
-  async findRequiereCita(): Promise<TipoServicios[]> {
+  async findRequiereCita(): Promise<BaseResponseDto<TipoServicios[]>> {
     return this.tipoServiciosService.findRequiereCita();
   }
 
@@ -137,7 +137,7 @@ export class TipoServiciosController {
   })
   async findByCategoria(
     @Param('categoria') categoria: string,
-  ): Promise<TipoServicios[]> {
+  ): Promise<BaseResponseDto<TipoServicios[]>> {
     return this.tipoServiciosService.findByCategoria(categoria);
   }
 
@@ -164,7 +164,7 @@ export class TipoServiciosController {
   })
   async findOne(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<TipoServicios> {
+  ): Promise<BaseResponseDto<TipoServicios>> {
     return this.tipoServiciosService.findOne(id);
   }
 
@@ -195,7 +195,7 @@ export class TipoServiciosController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateTipoServicioDto: UpdateTipoServicioDto,
-  ): Promise<TipoServicios> {
+  ): Promise<BaseResponseDto<TipoServicios>> {
     return this.tipoServiciosService.update(id, updateTipoServicioDto);
   }
 
@@ -224,7 +224,9 @@ export class TipoServiciosController {
     description:
       'No se puede eliminar porque tiene registros asociados (citas, reservas o servicios)',
   })
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BaseResponseDto<TipoServicios>> {
     return this.tipoServiciosService.remove(id);
   }
 
@@ -251,7 +253,9 @@ export class TipoServiciosController {
     status: 409,
     description: 'No se puede eliminar porque tiene registros asociados',
   })
-  async hardDelete(@Param('id', ParseUUIDPipe) id: string) {
+  async hardDelete(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BaseResponseDto<null>> {
     return this.tipoServiciosService.hardDelete(id);
   }
 
@@ -281,7 +285,7 @@ export class TipoServiciosController {
   })
   async activate(
     @Param('id', ParseUUIDPipe) id: string,
-  ): Promise<TipoServicios> {
+  ): Promise<BaseResponseDto<TipoServicios>> {
     return this.tipoServiciosService.activate(id);
   }
 }

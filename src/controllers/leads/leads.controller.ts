@@ -20,18 +20,17 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { LeadsService } from '../../services/leads/leads.service';
-import { CreateLeadDto } from '../../DTO/leads/create-lead.dto';
-import { UpdateLeadDto } from '../../DTO/leads/update-lead.dto';
+import { CreateLeadDto, UpdateLeadDto } from 'src/DTO';
 import { Leads } from '../../entities/Leads';
+import { BaseResponseDto } from 'src/DTO/baseResponse/baseResponse.dto';
 
 @ApiTags('Leads')
 @ApiBearerAuth()
 @Controller('leads')
 export class LeadsController {
-  constructor(private readonly leadsService: LeadsService) {}
+  constructor(private readonly leadsService: LeadsService) { }
 
   @Post()
-  @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Crear un nuevo lead',
     description: 'Registra un nuevo lead con sus datos de contacto y servicio solicitado',
@@ -53,7 +52,9 @@ export class LeadsController {
     status: 400,
     description: 'Datos de entrada inválidos o tipo de servicio inactivo',
   })
-  async create(@Body() createLeadDto: CreateLeadDto): Promise<Leads> {
+  async create(
+    @Body() createLeadDto: CreateLeadDto,
+  ): Promise<BaseResponseDto<Leads>> {
     return this.leadsService.create(createLeadDto);
   }
 
@@ -68,7 +69,7 @@ export class LeadsController {
     description: 'Lista de leads obtenida exitosamente',
     type: [Leads],
   })
-  async findAll(): Promise<Leads[]> {
+  async findAll(): Promise<BaseResponseDto<Leads[]>> {
     return this.leadsService.findAll();
   }
 
@@ -83,7 +84,7 @@ export class LeadsController {
     description: 'Lista de leads recientes obtenida exitosamente',
     type: [Leads],
   })
-  async findAllActive(): Promise<Leads[]> {
+  async findAllActive(): Promise<BaseResponseDto<Leads[]>> {
     return this.leadsService.findAllActive();
   }
 
@@ -105,7 +106,7 @@ export class LeadsController {
   })
   async findByTipoServicio(
     @Param('idTipoServicio', ParseUUIDPipe) idTipoServicio: string,
-  ): Promise<Leads[]> {
+  ): Promise<BaseResponseDto<Leads[]>> {
     return this.leadsService.findByTipoServicio(idTipoServicio);
   }
 
@@ -129,7 +130,9 @@ export class LeadsController {
     status: 404,
     description: 'Lead no encontrado',
   })
-  async findByEmail(@Query('correo') correo: string): Promise<Leads | null> {
+  async findByEmail(
+    @Query('correo') correo: string,
+  ): Promise<BaseResponseDto<Leads>> {
     return this.leadsService.findByEmail(correo);
   }
 
@@ -153,7 +156,9 @@ export class LeadsController {
     status: 404,
     description: 'Lead no encontrado',
   })
-  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<Leads> {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BaseResponseDto<Leads>> {
     return this.leadsService.findOne(id);
   }
 
@@ -188,7 +193,7 @@ export class LeadsController {
   async update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateLeadDto: UpdateLeadDto,
-  ): Promise<Leads> {
+  ): Promise<BaseResponseDto<Leads>> {
     return this.leadsService.update(id, updateLeadDto);
   }
 
@@ -211,7 +216,9 @@ export class LeadsController {
     status: 404,
     description: 'Lead no encontrado',
   })
-  async remove(@Param('id', ParseUUIDPipe) id: string) {
+  async remove(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<BaseResponseDto<null>> {
     return this.leadsService.remove(id);
   }
 }

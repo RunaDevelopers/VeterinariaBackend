@@ -3,33 +3,46 @@ import {
   NotFoundException,
   ConflictException,
   InternalServerErrorException,
+  HttpStatus,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { TipoServicios } from '../../entities/TipoServicios';
 import { CreateTipoServicioDto } from '../../DTO/tipo-servicios/create-tipo-servicio.dto';
 import { UpdateTipoServicioDto } from '../../DTO/tipo-servicios/update-tipo-servicio.dto';
+import { BaseResponseDto } from 'src/DTO/baseResponse/baseResponse.dto';
 
 @Injectable()
 export class TipoServiciosService {
   constructor(
     @InjectRepository(TipoServicios)
     private readonly tipoServiciosRepository: Repository<TipoServicios>,
-  ) {}
+  ) { }
 
   /**
    * Obtener todos los tipos de servicios
    */
-  async findAll(): Promise<TipoServicios[]> {
+  async findAll(): Promise<BaseResponseDto<TipoServicios[]>> {
     try {
-      return await this.tipoServiciosRepository.find({
+      const tiposServicios = await this.tipoServiciosRepository.find({
         order: {
           nombreServicio: 'ASC',
         },
       });
+      return new BaseResponseDto<TipoServicios[]>(
+        true,
+        'Lista cargada exitosamente',
+        tiposServicios,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
-        'Error al obtener la lista de tipos de servicios',
+      return new BaseResponseDto<TipoServicios[]>(
+        false,
+        'Error al obtener los tipos de servicios',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -37,17 +50,28 @@ export class TipoServiciosService {
   /**
    * Obtener solo tipos de servicios activos
    */
-  async findAllActive(): Promise<TipoServicios[]> {
+  async findAllActive(): Promise<BaseResponseDto<TipoServicios[]>> {
     try {
-      return await this.tipoServiciosRepository.find({
+      const tiposServicios = await this.tipoServiciosRepository.find({
         where: { activo: true },
         order: {
           nombreServicio: 'ASC',
         },
       });
+      return new BaseResponseDto<TipoServicios[]>(
+        true,
+        'Tipos de servicios activos cargados exitosamente',
+        tiposServicios,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios[]>(
+        false,
         'Error al obtener los tipos de servicios activos',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -55,17 +79,30 @@ export class TipoServiciosService {
   /**
    * Obtener tipos de servicios por categoría
    */
-  async findByCategoria(categoria: string): Promise<TipoServicios[]> {
+  async findByCategoria(
+    categoria: string,
+  ): Promise<BaseResponseDto<TipoServicios[]>> {
     try {
-      return await this.tipoServiciosRepository.find({
+      const tiposServicios = await this.tipoServiciosRepository.find({
         where: { categoria, activo: true },
         order: {
           nombreServicio: 'ASC',
         },
       });
+      return new BaseResponseDto<TipoServicios[]>(
+        true,
+        `Tipos de servicios de categoría "${categoria}" cargados exitosamente`,
+        tiposServicios,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios[]>(
+        false,
         'Error al obtener los tipos de servicios por categoría',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -73,17 +110,30 @@ export class TipoServiciosService {
   /**
    * Obtener servicios que requieren veterinario
    */
-  async findRequiereVeterinario(): Promise<TipoServicios[]> {
+  async findRequiereVeterinario(): Promise<
+    BaseResponseDto<TipoServicios[]>
+  > {
     try {
-      return await this.tipoServiciosRepository.find({
+      const tiposServicios = await this.tipoServiciosRepository.find({
         where: { requiereVeterinario: true, activo: true },
         order: {
           nombreServicio: 'ASC',
         },
       });
+      return new BaseResponseDto<TipoServicios[]>(
+        true,
+        'Servicios que requieren veterinario cargados exitosamente',
+        tiposServicios,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios[]>(
+        false,
         'Error al obtener los servicios que requieren veterinario',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -91,17 +141,28 @@ export class TipoServiciosService {
   /**
    * Obtener servicios que requieren cita
    */
-  async findRequiereCita(): Promise<TipoServicios[]> {
+  async findRequiereCita(): Promise<BaseResponseDto<TipoServicios[]>> {
     try {
-      return await this.tipoServiciosRepository.find({
+      const tiposServicios = await this.tipoServiciosRepository.find({
         where: { requiereCita: true, activo: true },
         order: {
           nombreServicio: 'ASC',
         },
       });
+      return new BaseResponseDto<TipoServicios[]>(
+        true,
+        'Servicios que requieren cita cargados exitosamente',
+        tiposServicios,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios[]>(
+        false,
         'Error al obtener los servicios que requieren cita',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -109,7 +170,7 @@ export class TipoServiciosService {
   /**
    * Obtener un tipo de servicio por ID
    */
-  async findOne(id: string): Promise<TipoServicios> {
+  async findOne(id: string): Promise<BaseResponseDto<TipoServicios>> {
     try {
       const tipoServicio = await this.tipoServiciosRepository.findOne({
         where: { idTipoServicio: id },
@@ -117,18 +178,29 @@ export class TipoServiciosService {
       });
 
       if (!tipoServicio) {
-        throw new NotFoundException(
+        return new BaseResponseDto<TipoServicios>(
+          false,
           `Tipo de servicio con ID ${id} no encontrado`,
+          undefined,
+          null,
+          HttpStatus.NOT_FOUND,
         );
       }
 
-      return tipoServicio;
+      return new BaseResponseDto<TipoServicios>(
+        true,
+        'Tipo de servicio encontrado exitosamente',
+        tipoServicio,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios>(
+        false,
         'Error al obtener el tipo de servicio',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -136,25 +208,36 @@ export class TipoServiciosService {
   /**
    * Obtener un tipo de servicio por ID (sin relaciones)
    */
-  async findOneSimple(id: string): Promise<TipoServicios> {
+  async findOneSimple(id: string): Promise<BaseResponseDto<TipoServicios>> {
     try {
       const tipoServicio = await this.tipoServiciosRepository.findOne({
         where: { idTipoServicio: id },
       });
 
       if (!tipoServicio) {
-        throw new NotFoundException(
+        return new BaseResponseDto<TipoServicios>(
+          false,
           `Tipo de servicio con ID ${id} no encontrado`,
+          undefined,
+          null,
+          HttpStatus.NOT_FOUND,
         );
       }
 
-      return tipoServicio;
+      return new BaseResponseDto<TipoServicios>(
+        true,
+        'Tipo de servicio encontrado exitosamente',
+        tipoServicio,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      if (error instanceof NotFoundException) {
-        throw error;
-      }
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios>(
+        false,
         'Error al obtener el tipo de servicio',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -164,27 +247,44 @@ export class TipoServiciosService {
    */
   async create(
     createTipoServicioDto: CreateTipoServicioDto,
-  ): Promise<TipoServicios> {
-    // Verificar si el nombre del servicio ya existe
-    const existingServicio = await this.tipoServiciosRepository.findOne({
-      where: { nombreServicio: createTipoServicioDto.nombreServicio },
-    });
-
-    if (existingServicio) {
-      throw new ConflictException(
-        `El tipo de servicio "${createTipoServicioDto.nombreServicio}" ya existe`,
-      );
-    }
-
+  ): Promise<BaseResponseDto<TipoServicios>> {
     try {
+      // Verificar si el nombre del servicio ya existe
+      const existingServicio = await this.tipoServiciosRepository.findOne({
+        where: { nombreServicio: createTipoServicioDto.nombreServicio },
+      });
+
+      if (existingServicio) {
+        return new BaseResponseDto<TipoServicios>(
+          false,
+          `El tipo de servicio "${createTipoServicioDto.nombreServicio}" ya existe`,
+          undefined,
+          null,
+          HttpStatus.CONFLICT,
+        );
+      }
+
       const nuevoTipoServicio = this.tipoServiciosRepository.create({
         ...createTipoServicioDto,
         precioBase: createTipoServicioDto.precioBase?.toString(),
       });
-      return await this.tipoServiciosRepository.save(nuevoTipoServicio);
+      const tipoServicioGuardado =
+        await this.tipoServiciosRepository.save(nuevoTipoServicio);
+
+      return new BaseResponseDto<TipoServicios>(
+        true,
+        'Tipo de servicio creado exitosamente',
+        tipoServicioGuardado,
+        null,
+        HttpStatus.CREATED,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios>(
+        false,
         'Error al crear el tipo de servicio',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -195,27 +295,36 @@ export class TipoServiciosService {
   async update(
     id: string,
     updateTipoServicioDto: UpdateTipoServicioDto,
-  ): Promise<TipoServicios> {
-    // Verificar que el tipo de servicio existe
-    const tipoServicio = await this.findOneSimple(id);
-
-    // Si se está actualizando el nombre, verificar que no exista otro servicio con ese nombre
-    if (
-      updateTipoServicioDto.nombreServicio &&
-      updateTipoServicioDto.nombreServicio !== tipoServicio.nombreServicio
-    ) {
-      const existingServicio = await this.tipoServiciosRepository.findOne({
-        where: { nombreServicio: updateTipoServicioDto.nombreServicio },
-      });
-
-      if (existingServicio) {
-        throw new ConflictException(
-          `Ya existe otro tipo de servicio con el nombre "${updateTipoServicioDto.nombreServicio}"`,
-        );
-      }
-    }
-
+  ): Promise<BaseResponseDto<TipoServicios>> {
     try {
+      // Verificar que el tipo de servicio existe
+      const tipoServicioResponse = await this.findOneSimple(id);
+      if (!tipoServicioResponse.success) {
+        return tipoServicioResponse;
+      }
+
+      const tipoServicio = tipoServicioResponse.data;
+
+      // Si se está actualizando el nombre, verificar que no exista otro servicio con ese nombre
+      if (
+        updateTipoServicioDto.nombreServicio &&
+        updateTipoServicioDto.nombreServicio !== tipoServicio.nombreServicio
+      ) {
+        const existingServicio = await this.tipoServiciosRepository.findOne({
+          where: { nombreServicio: updateTipoServicioDto.nombreServicio },
+        });
+
+        if (existingServicio) {
+          return new BaseResponseDto<TipoServicios>(
+            false,
+            `Ya existe otro tipo de servicio con el nombre "${updateTipoServicioDto.nombreServicio}"`,
+            undefined,
+            null,
+            HttpStatus.CONFLICT,
+          );
+        }
+      }
+
       // Actualizar los campos
       Object.assign(tipoServicio, {
         ...updateTipoServicioDto,
@@ -223,10 +332,23 @@ export class TipoServiciosService {
       });
       tipoServicio.fechaModificacion = new Date();
 
-      return await this.tipoServiciosRepository.save(tipoServicio);
+      const tipoServicioActualizado =
+        await this.tipoServiciosRepository.save(tipoServicio);
+
+      return new BaseResponseDto<TipoServicios>(
+        true,
+        'Tipo de servicio actualizado exitosamente',
+        tipoServicioActualizado,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios>(
+        false,
         'Error al actualizar el tipo de servicio',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -234,38 +356,52 @@ export class TipoServiciosService {
   /**
    * Eliminar un tipo de servicio (eliminación lógica)
    */
-  async remove(
-    id: string,
-  ): Promise<{ message: string; tipoServicio: TipoServicios }> {
-    const tipoServicio = await this.findOne(id);
-
-    // Verificar si el tipo de servicio tiene registros relacionados
-    const tieneRelaciones =
-      (tipoServicio.citasMedicas && tipoServicio.citasMedicas.length > 0) ||
-      (tipoServicio.reservas && tipoServicio.reservas.length > 0) ||
-      (tipoServicio.serviciosRealizados &&
-        tipoServicio.serviciosRealizados.length > 0);
-
-    if (tieneRelaciones) {
-      throw new ConflictException(
-        `No se puede eliminar el tipo de servicio "${tipoServicio.nombreServicio}" porque tiene registros asociados (citas, reservas o servicios realizados)`,
-      );
-    }
-
+  async remove(id: string): Promise<BaseResponseDto<TipoServicios>> {
     try {
+      const tipoServicioResponse = await this.findOne(id);
+      if (!tipoServicioResponse.success) {
+        return tipoServicioResponse;
+      }
+
+      const tipoServicio = tipoServicioResponse.data;
+
+      // Verificar si el tipo de servicio tiene registros relacionados
+      const tieneRelaciones =
+        (tipoServicio.citasMedicas && tipoServicio.citasMedicas.length > 0) ||
+        (tipoServicio.reservas && tipoServicio.reservas.length > 0) ||
+        (tipoServicio.serviciosRealizados &&
+          tipoServicio.serviciosRealizados.length > 0);
+
+      if (tieneRelaciones) {
+        return new BaseResponseDto<TipoServicios>(
+          false,
+          `No se puede eliminar el tipo de servicio "${tipoServicio.nombreServicio}" porque tiene registros asociados (citas, reservas o servicios realizados)`,
+          undefined,
+          null,
+          HttpStatus.CONFLICT,
+        );
+      }
+
       // Eliminación lógica (desactivar)
       tipoServicio.activo = false;
       tipoServicio.fechaModificacion = new Date();
       const tipoServicioDesactivado =
         await this.tipoServiciosRepository.save(tipoServicio);
 
-      return {
-        message: `Tipo de servicio "${tipoServicio.nombreServicio}" desactivado exitosamente`,
-        tipoServicio: tipoServicioDesactivado,
-      };
+      return new BaseResponseDto<TipoServicios>(
+        true,
+        `Tipo de servicio "${tipoServicio.nombreServicio}" desactivado exitosamente`,
+        tipoServicioDesactivado,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios>(
+        false,
         'Error al eliminar el tipo de servicio',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -273,30 +409,54 @@ export class TipoServiciosService {
   /**
    * Eliminar permanentemente un tipo de servicio
    */
-  async hardDelete(id: string): Promise<{ message: string }> {
-    const tipoServicio = await this.findOne(id);
-
-    // Verificar si el tipo de servicio tiene registros relacionados
-    const tieneRelaciones =
-      (tipoServicio.citasMedicas && tipoServicio.citasMedicas.length > 0) ||
-      (tipoServicio.reservas && tipoServicio.reservas.length > 0) ||
-      (tipoServicio.serviciosRealizados &&
-        tipoServicio.serviciosRealizados.length > 0);
-
-    if (tieneRelaciones) {
-      throw new ConflictException(
-        `No se puede eliminar permanentemente el tipo de servicio "${tipoServicio.nombreServicio}" porque tiene registros asociados`,
-      );
-    }
-
+  async hardDelete(id: string): Promise<BaseResponseDto<null>> {
     try {
+      const tipoServicioResponse = await this.findOne(id);
+      if (!tipoServicioResponse.success) {
+        return new BaseResponseDto<null>(
+          false,
+          tipoServicioResponse.message,
+          null,
+          null,
+          tipoServicioResponse.statusCode,
+        );
+      }
+
+      const tipoServicio = tipoServicioResponse.data;
+
+      // Verificar si el tipo de servicio tiene registros relacionados
+      const tieneRelaciones =
+        (tipoServicio.citasMedicas && tipoServicio.citasMedicas.length > 0) ||
+        (tipoServicio.reservas && tipoServicio.reservas.length > 0) ||
+        (tipoServicio.serviciosRealizados &&
+          tipoServicio.serviciosRealizados.length > 0);
+
+      if (tieneRelaciones) {
+        return new BaseResponseDto<null>(
+          false,
+          `No se puede eliminar permanentemente el tipo de servicio "${tipoServicio.nombreServicio}" porque tiene registros asociados`,
+          null,
+          null,
+          HttpStatus.CONFLICT,
+        );
+      }
+
       await this.tipoServiciosRepository.remove(tipoServicio);
-      return {
-        message: `Tipo de servicio "${tipoServicio.nombreServicio}" eliminado permanentemente`,
-      };
+
+      return new BaseResponseDto<null>(
+        true,
+        `Tipo de servicio "${tipoServicio.nombreServicio}" eliminado permanentemente`,
+        null,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<null>(
+        false,
         'Error al eliminar permanentemente el tipo de servicio',
+        null,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
@@ -304,20 +464,44 @@ export class TipoServiciosService {
   /**
    * Reactivar un tipo de servicio desactivado
    */
-  async activate(id: string): Promise<TipoServicios> {
-    const tipoServicio = await this.findOneSimple(id);
-
-    if (tipoServicio.activo) {
-      throw new ConflictException('El tipo de servicio ya está activo');
-    }
-
+  async activate(id: string): Promise<BaseResponseDto<TipoServicios>> {
     try {
+      const tipoServicioResponse = await this.findOneSimple(id);
+      if (!tipoServicioResponse.success) {
+        return tipoServicioResponse;
+      }
+
+      const tipoServicio = tipoServicioResponse.data;
+
+      if (tipoServicio.activo) {
+        return new BaseResponseDto<TipoServicios>(
+          false,
+          'El tipo de servicio ya está activo',
+          undefined,
+          null,
+          HttpStatus.CONFLICT,
+        );
+      }
+
       tipoServicio.activo = true;
       tipoServicio.fechaModificacion = new Date();
-      return await this.tipoServiciosRepository.save(tipoServicio);
+      const tipoServicioActivado =
+        await this.tipoServiciosRepository.save(tipoServicio);
+
+      return new BaseResponseDto<TipoServicios>(
+        true,
+        'Tipo de servicio activado exitosamente',
+        tipoServicioActivado,
+        null,
+        HttpStatus.OK,
+      );
     } catch (error) {
-      throw new InternalServerErrorException(
+      return new BaseResponseDto<TipoServicios>(
+        false,
         'Error al activar el tipo de servicio',
+        undefined,
+        error,
+        HttpStatus.INTERNAL_SERVER_ERROR,
       );
     }
   }
