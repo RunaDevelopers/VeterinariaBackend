@@ -33,6 +33,9 @@ export class TipoServicios {
   })
   categoria: string | null;
 
+  @Column("text", { name: "foto_url", nullable: true })
+  fotoUrl: string | null;
+
   @Column("boolean", {
     name: "requiere_cita",
     nullable: true,

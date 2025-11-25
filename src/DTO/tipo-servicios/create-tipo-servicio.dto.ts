@@ -8,6 +8,7 @@ import {
   MaxLength,
   Min,
   Max,
+  IsUrl,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 
@@ -43,6 +44,15 @@ export class CreateTipoServicioDto {
     message: 'La categoría no puede exceder 50 caracteres',
   })
   categoria?: string;
+
+  @ApiPropertyOptional({
+    description: 'URL de la foto del servicio',
+    example: 'https://example.com/foto.jpg',
+  })
+  @IsString()
+  @IsOptional()
+  @IsUrl({}, { message: 'La foto debe ser una URL válida' })
+  fotoUrl?: string;
 
   @ApiPropertyOptional({
     description: 'Indica si el servicio requiere cita previa',
