@@ -11,9 +11,10 @@ import { TipoServicios } from '../../entities/TipoServicios';
 import { CreateTipoServicioDto } from '../../DTO/tipo-servicios/create-tipo-servicio.dto';
 import { UpdateTipoServicioDto } from '../../DTO/tipo-servicios/update-tipo-servicio.dto';
 import { BaseResponseDto } from 'src/DTO/baseResponse/baseResponse.dto';
+import { TipoServiciosInterface } from 'src/interfaces/tipo-servicios.interface';
 
 @Injectable()
-export class TipoServiciosService {
+export class TipoServiciosService implements TipoServiciosInterface{
   constructor(
     @InjectRepository(TipoServicios)
     private readonly tipoServiciosRepository: Repository<TipoServicios>,
