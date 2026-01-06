@@ -1,4 +1,4 @@
-import { HttpStatus, Injectable } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateProductoDto } from 'src/DTO';
@@ -15,11 +15,6 @@ export class ProductosService implements ProductoInterface {
         private readonly tipoProductoService: TipoProductoService,
     ) { }
 
-    /**
-     * Genera un código único de producto basado en el nombre
-     * @param name - Nombre del producto
-     * @returns Código formateado (ej: "AMOX-500-847")
-     */
     private createCodeProducto(name: string): string {
         // Limpiar y formatear el nombre
         const cleanName = name
@@ -127,25 +122,152 @@ export class ProductosService implements ProductoInterface {
             );
         }
     }
-    getProductos(): Promise<BaseResponseDto<Productos[]>> {
+    async getProductos(): Promise<BaseResponseDto<Productos[]>> {
+        
+        try {
+            const productos = await this.productosRepository.find();
+            return new BaseResponseDto<Productos[]>(
+                true,
+                'Productos cargados exitosamente',
+                productos,
+                null,
+                HttpStatus.OK,
+            );
+        } catch (error) {
+            return new BaseResponseDto<any>(
+                false,
+                'Error al cargar los productos',
+                undefined,
+                error.message || error,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+
+    }
+
+    async getProductosActivos(): Promise<BaseResponseDto<Productos[]>> {
+        try {
+            const productosActivos = await this.productosRepository.find({ where: { activo: true } });
+            return new BaseResponseDto<Productos[]>(
+                true,
+                'Productos activos cargados exitosamente',
+                productosActivos,
+                null,
+                HttpStatus.OK,
+            );
+        } catch (error) {
+             return new BaseResponseDto<any>(
+                false,
+                'Error al cargar los productos',
+                undefined,
+                error.message || error,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+    async getProductoByName(name: string): Promise<BaseResponseDto<Productos>> {
+        try {
+            const producto = await this.productosRepository.findOne({ where: { nombreProducto: name } });
+            if(!producto){
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `Producto con nombre ${name} no encontrado`,
+                    undefined,
+                    null,
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            return new BaseResponseDto<Productos>(
+                true,
+                'Producto encontrado exitosamente',
+                producto,
+                null,
+                HttpStatus.OK,
+            );
+        } catch (error) {
+
+                return new BaseResponseDto<any>(
+                false,
+                'Error al obtener el producto',
+                undefined,
+                error.message || error,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
+    }
+
+    async updateProducto(id: string, producto: CreateProductoDto): Promise<BaseResponseDto<Productos | null>> {
+       try {
+            // 1. Validar que el tipo de producto existe y está activo
+            const tipoProductoResponse = await this.tipoProductoService.getTipoProductoById(
+                producto.idTipoProducto
+            );
+
+            if (!tipoProductoResponse.success || !tipoProductoResponse.data) {
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `Tipo de producto con ID ${producto.idTipoProducto} no encontrado`,
+                    undefined,
+                    null,
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            if (!tipoProductoResponse.data.activo) {
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `El tipo de producto "${tipoProductoResponse.data.nombreTipo}" no está activo`,
+                    undefined,
+                    null,
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
+            // Validaremos duplicados y codigo existente
+            const existingProducto = await this.productosRepository.findOne({
+                where: [
+                    { nombreProducto: producto.nombreProducto },
+                    { codigoProducto: producto.codigoProducto }
+                ]
+            });
+
+            if (existingProducto) {
+                const campo = existingProducto.nombreProducto === producto.nombreProducto ? 'nombre' : 'código';
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `Ya existe un producto con ese ${campo}: "${existingProducto.nombreProducto === producto.nombreProducto ? producto.nombreProducto : producto.codigoProducto}"`,
+                    undefined,
+                    null,
+                    HttpStatus.CONFLICT,
+                );
+            }
+
+            // 3. Actualizar y guardar usando el mapeo (las validaciones de stocks/precios las hace el DTO)
+            const datosProducto = this.mapDtoToEntity(producto);
+            await this.productosRepository.update(id, datosProducto);
+            const productoActualizado = await this.productosRepository.findOne({ where: { idProducto: id } });
+            return new BaseResponseDto<Productos>(
+                true,
+                'Producto actualizado exitosamente',
+                productoActualizado ?? undefined,
+                null,
+                HttpStatus.OK,
+            );
+        } catch (error) {
+            
+        }
+    }
+
+    async deleteLogicalProducto(id: string): Promise<BaseResponseDto<null>> {
         throw new Error('Method not implemented.');
     }
-    getProductosActivos(): Promise<BaseResponseDto<Productos[]>> {
+
+    async activateProducto(id: string): Promise<BaseResponseDto<Productos>> {
         throw new Error('Method not implemented.');
     }
-    getProductoByName(name: string): Promise<BaseResponseDto<Productos>> {
-        throw new Error('Method not implemented.');
-    }
-    updateProducto(id: string, producto: CreateProductoDto): Promise<BaseResponseDto<Productos>> {
-        throw new Error('Method not implemented.');
-    }
-    deleteLogicalProducto(id: string): Promise<BaseResponseDto<null>> {
-        throw new Error('Method not implemented.');
-    }
-    activateProducto(id: string): Promise<BaseResponseDto<Productos>> {
-        throw new Error('Method not implemented.');
-    }
-    hardDeleteProducto(id: string): Promise<BaseResponseDto<null>> {
+
+    async hardDeleteProducto(id: string): Promise<BaseResponseDto<null>> {
         throw new Error('Method not implemented.');
     }
 }
