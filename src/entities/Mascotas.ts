@@ -69,13 +69,13 @@ export class Mascotas {
   })
   numeroRegistro: string | null;
 
-  @Column("numeric", {
+  @Column("decimal", {
     name: "peso_actual",
     nullable: true,
     precision: 5,
     scale: 2,
   })
-  pesoActual: string | null;
+  pesoActual: number | null;
 
   @Column("boolean", {
     name: "esterilizado",

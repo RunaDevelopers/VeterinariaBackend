@@ -44,7 +44,7 @@ export class Razas {
     precision: 5,
     scale: 2,
   })
-  pesoPromedioMin: string | null;
+  pesoPromedioMin: number | null;
 
   @Column("numeric", {
     name: "peso_promedio_max",
@@ -52,7 +52,7 @@ export class Razas {
     precision: 5,
     scale: 2,
   })
-  pesoPromedioMax: string | null;
+  pesoPromedioMax: number | null;
 
   @Column("integer", { name: "esperanza_vida_anios", nullable: true })
   esperanzaVidaAnios: number | null;

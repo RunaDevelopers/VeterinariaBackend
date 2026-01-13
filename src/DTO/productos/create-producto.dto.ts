@@ -12,13 +12,13 @@ export class CreateProductoDto {
     @IsNotEmpty()
     idTipoProducto: string;
 
-    @ApiProperty({
-        description: 'Código único del producto',
-        example: 'PROD-001',
+    @ApiPropertyOptional({
+        description: 'Código único del producto (se genera automáticamente si no se proporciona)',
+        example: 'AMOX-500-47',
     })
     @IsString()
-    @IsNotEmpty()
-    codigoProducto: string;
+    @IsOptional()
+    codigoProducto?: string;
 
     @ApiProperty({
         description: 'Nombre del producto',
@@ -121,18 +121,6 @@ export class CreateProductoDto {
     @IsPrecioVentaValid()
     @IsNotEmpty()
     precioVenta: number;
-
-    @ApiPropertyOptional({
-        description: 'Porcentaje de IVA',
-        example: 18,
-        default: 0,
-    })
-    @Type(() => Number)
-    @IsNumber({}, { message: 'El IVA debe ser un número' })
-    @Min(0, { message: 'El IVA no puede ser negativo' })
-    @Max(100, { message: 'El IVA no puede exceder 100%' })
-    @IsOptional()
-    iva?: number;
 
     @ApiPropertyOptional({
         description: 'Fecha de caducidad',

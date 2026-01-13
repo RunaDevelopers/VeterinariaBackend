@@ -11,6 +11,14 @@ export class CreateEspecieDto {
     nombreEspecie: string;
 
     @ApiPropertyOptional({
+        description: 'Nombre científico de la especie',
+        example: 'Canis lupus familiaris',
+    })
+    @IsString()
+    @IsOptional()
+    nombreCientifico?: string;
+
+    @ApiPropertyOptional({
         description: 'Descripción de la especie',
         example: 'Perros domésticos',
     })

@@ -1,5 +1,6 @@
-import { IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString, IsBoolean, IsNumber } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString, IsUUID, IsDateString, IsBoolean, IsNumber, IsPositive } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
+import { Type } from 'class-transformer';
 
 export class CreateMascotaDto {
     @ApiProperty({
@@ -43,16 +44,16 @@ export class CreateMascotaDto {
     edadEstimada?: string;
 
     @ApiPropertyOptional({
-        description: 'Sexo de la mascota',
-        example: 'Macho',
-        enum: ['Macho', 'Hembra'],
+        description: 'Sexo de la mascota (M o H)',
+        example: 'M',
+        enum: ['M', 'H'],
     })
     @IsString()
     @IsOptional()
     sexo?: string;
 
     @ApiPropertyOptional({
-        description: 'ID de la raza',
+        description: 'ID de la raza (opcional si no se conoce la raza específica)',
         example: '123e4567-e89b-12d3-a456-426614174002',
     })
     @IsUUID()
@@ -73,24 +74,25 @@ export class CreateMascotaDto {
     })
     @IsString()
     @IsOptional()
-    señasParticulares?: string;
+    seniasParticulares?: string;
 
     @ApiPropertyOptional({
-        description: 'Peso en kilogramos',
-        example: 15.5,
-    })
-    @IsNumber()
-    @IsOptional()
-    peso?: number;
-
-    @ApiPropertyOptional({
-        description: 'Tamaño de la mascota',
-        example: 'Mediano',
-        enum: ['Pequeño', 'Mediano', 'Grande', 'Gigante'],
+        description: 'Número de registro oficial',
+        example: 'REG-2024-001234',
     })
     @IsString()
     @IsOptional()
-    tamaño?: string;
+    numeroRegistro?: string;
+
+    @ApiPropertyOptional({
+        description: 'Peso actual en kilogramos',
+        example: 15.5,
+    })
+    @Type(() => Number)
+    @IsNumber({}, { message: 'El peso debe ser un número' })
+    @IsPositive({ message: 'El peso debe ser mayor a 0' })
+    @IsOptional()
+    pesoActual?: number;
 
     @ApiPropertyOptional({
         description: 'Indica si está esterilizado',
@@ -109,44 +111,12 @@ export class CreateMascotaDto {
     fechaEsterilizacion?: string;
 
     @ApiPropertyOptional({
-        description: 'Número de microchip',
-        example: '985112345678901',
+        description: 'Comportamiento de la mascota',
+        example: 'Tranquilo y sociable',
     })
     @IsString()
     @IsOptional()
-    numeroMicrochip?: string;
-
-    @ApiPropertyOptional({
-        description: 'Número de registro oficial',
-        example: 'REG-2024-001234',
-    })
-    @IsString()
-    @IsOptional()
-    numeroRegistro?: string;
-
-    @ApiPropertyOptional({
-        description: 'Compañía de seguro médico',
-        example: 'PetSafe Insurance',
-    })
-    @IsString()
-    @IsOptional()
-    seguroMedico?: string;
-
-    @ApiPropertyOptional({
-        description: 'Número de póliza del seguro',
-        example: 'POL-123456789',
-    })
-    @IsString()
-    @IsOptional()
-    numeroPoliza?: string;
-
-    @ApiPropertyOptional({
-        description: 'Observaciones adicionales',
-        example: 'Mascota muy sociable con otros animales',
-    })
-    @IsString()
-    @IsOptional()
-    observaciones?: string;
+    comportamiento?: string;
 
     @ApiPropertyOptional({
         description: 'URL de la foto de la mascota',
@@ -155,6 +125,31 @@ export class CreateMascotaDto {
     @IsString()
     @IsOptional()
     foto?: string;
+
+    @ApiPropertyOptional({
+        description: 'Indica si la mascota ha fallecido',
+        example: false,
+        default: false,
+    })
+    @IsBoolean()
+    @IsOptional()
+    fallecido?: boolean;
+
+    @ApiPropertyOptional({
+        description: 'Fecha de fallecimiento',
+        example: '2024-01-15',
+    })
+    @IsDateString()
+    @IsOptional()
+    fechaFallecimiento?: string;
+
+    @ApiPropertyOptional({
+        description: 'Causa del fallecimiento',
+        example: 'Enfermedad crónica',
+    })
+    @IsString()
+    @IsOptional()
+    causaFallecimiento?: string;
 
     @ApiPropertyOptional({
         description: 'Estado activo de la mascota',

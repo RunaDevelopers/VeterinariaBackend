@@ -50,8 +50,16 @@ export class CreateUsuarioDto {
     @IsNotEmpty()
     password: string;
 
+    @ApiProperty({
+        description: 'Teléfono de contacto',
+        example: '+51987654321',
+    })
+    @IsString()
+    @IsNotEmpty()
+    telefono: string;
+
     @ApiPropertyOptional({
-        description: 'Documento de identidad',
+        description: 'Documento de identidad (único)',
         example: '12345678',
     })
     @IsString()
@@ -59,12 +67,12 @@ export class CreateUsuarioDto {
     documentoIdentidad?: string;
 
     @ApiPropertyOptional({
-        description: 'Teléfono de contacto',
-        example: '+51987654321',
+        description: 'Tipo de documento',
+        example: 'DNI',
     })
     @IsString()
     @IsOptional()
-    telefono?: string;
+    tipoDocumento?: string;
 
     @ApiPropertyOptional({
         description: 'Dirección',
@@ -83,20 +91,12 @@ export class CreateUsuarioDto {
     especialidad?: string;
 
     @ApiPropertyOptional({
-        description: 'Número de licencia profesional',
+        description: 'Número de colegiatura (para veterinarios)',
         example: 'MVP-12345',
     })
     @IsString()
     @IsOptional()
-    numeroLicencia?: string;
-
-    @ApiPropertyOptional({
-        description: 'Fecha de contratación',
-        example: '2024-01-15',
-    })
-    @IsDateString()
-    @IsOptional()
-    fechaContratacion?: string;
+    numeroColegiatura?: string;
 
     @ApiPropertyOptional({
         description: 'URL de la foto del usuario',

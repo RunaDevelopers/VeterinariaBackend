@@ -199,7 +199,22 @@ export class ProductosService implements ProductoInterface {
 
     async updateProducto(id: string, producto: CreateProductoDto): Promise<BaseResponseDto<Productos | null>> {
        try {
-            // 1. Validar que el tipo de producto existe y está activo
+            // 1. Verificar que el producto a actualizar existe
+            const productoExistente = await this.productosRepository.findOne({ 
+                where: { idProducto: id } 
+            });
+
+            if (!productoExistente) {
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `Producto con ID ${id} no encontrado`,
+                    undefined,
+                    null,
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            // 2. Validar que el tipo de producto existe y está activo
             const tipoProductoResponse = await this.tipoProductoService.getTipoProductoById(
                 producto.idTipoProducto
             );
@@ -224,29 +239,44 @@ export class ProductosService implements ProductoInterface {
                 );
             }
 
-            // Validaremos duplicados y codigo existente
-            const existingProducto = await this.productosRepository.findOne({
-                where: [
-                    { nombreProducto: producto.nombreProducto },
-                    { codigoProducto: producto.codigoProducto }
-                ]
+            // 3. Validar duplicados (excluyendo el producto actual)
+            const duplicadoNombre = await this.productosRepository.findOne({
+                where: { nombreProducto: producto.nombreProducto }
             });
 
-            if (existingProducto) {
-                const campo = existingProducto.nombreProducto === producto.nombreProducto ? 'nombre' : 'código';
+            if (duplicadoNombre && duplicadoNombre.idProducto !== id) {
                 return new BaseResponseDto<Productos>(
                     false,
-                    `Ya existe un producto con ese ${campo}: "${existingProducto.nombreProducto === producto.nombreProducto ? producto.nombreProducto : producto.codigoProducto}"`,
+                    `Ya existe otro producto con el nombre: "${producto.nombreProducto}"`,
                     undefined,
                     null,
                     HttpStatus.CONFLICT,
                 );
             }
 
-            // 3. Actualizar y guardar usando el mapeo (las validaciones de stocks/precios las hace el DTO)
+            const codigoGenerado = this.createCodeProducto(producto.nombreProducto);
+            const duplicadoCodigo = await this.productosRepository.findOne({
+                where: { codigoProducto: codigoGenerado }
+            });
+
+            if (duplicadoCodigo && duplicadoCodigo.idProducto !== id) {
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `Ya existe otro producto con código similar: "${codigoGenerado}"`,
+                    undefined,
+                    null,
+                    HttpStatus.CONFLICT,
+                );
+            }
+
+            // 4. Actualizar y guardar usando el mapeo
             const datosProducto = this.mapDtoToEntity(producto);
             await this.productosRepository.update(id, datosProducto);
-            const productoActualizado = await this.productosRepository.findOne({ where: { idProducto: id } });
+            const productoActualizado = await this.productosRepository.findOne({ 
+                where: { idProducto: id },
+                relations: ['tipoProducto']
+            });
+
             return new BaseResponseDto<Productos>(
                 true,
                 'Producto actualizado exitosamente',
@@ -255,19 +285,144 @@ export class ProductosService implements ProductoInterface {
                 HttpStatus.OK,
             );
         } catch (error) {
-            
+            return new BaseResponseDto<Productos>(
+                false,
+                'Error al actualizar el producto',
+                undefined,
+                error.message || error,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
         }
     }
 
     async deleteLogicalProducto(id: string): Promise<BaseResponseDto<null>> {
-        throw new Error('Method not implemented.');
+        try {
+            const producto = await this.productosRepository.findOne({ 
+                where: { idProducto: id } 
+            });
+
+            if (!producto) {
+                return new BaseResponseDto<null>(
+                    false,
+                    `Producto con ID ${id} no encontrado`,
+                    undefined,
+                    null,
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            if (!producto.activo) {
+                return new BaseResponseDto<null>(
+                    false,
+                    `El producto "${producto.nombreProducto}" ya está inactivo`,
+                    undefined,
+                    null,
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
+            producto.activo = false;
+            await this.productosRepository.save(producto);
+
+            return new BaseResponseDto<null>(
+                true,
+                'Producto eliminado lógicamente',
+                null,
+                null,
+                HttpStatus.OK,
+            );
+        } catch (error) {
+            return new BaseResponseDto<null>(
+                false,
+                'Error al eliminar el producto',
+                undefined,
+                error.message || error,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     async activateProducto(id: string): Promise<BaseResponseDto<Productos>> {
-        throw new Error('Method not implemented.');
+        try {
+            const producto = await this.productosRepository.findOne({ 
+                where: { idProducto: id },
+                relations: ['tipoProducto']
+            });
+
+            if (!producto) {
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `Producto con ID ${id} no encontrado`,
+                    undefined,
+                    null,
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            if (producto.activo) {
+                return new BaseResponseDto<Productos>(
+                    false,
+                    `El producto "${producto.nombreProducto}" ya está activo`,
+                    undefined,
+                    null,
+                    HttpStatus.BAD_REQUEST,
+                );
+            }
+
+            producto.activo = true;
+            const productoActivado = await this.productosRepository.save(producto);
+
+            return new BaseResponseDto<Productos>(
+                true,
+                'Producto activado exitosamente',
+                productoActivado,
+                null,
+                HttpStatus.OK,
+            );
+        } catch (error) {
+            return new BaseResponseDto<Productos>(
+                false,
+                'Error al activar el producto',
+                undefined,
+                error.message || error,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 
     async hardDeleteProducto(id: string): Promise<BaseResponseDto<null>> {
-        throw new Error('Method not implemented.');
+        try {
+            const producto = await this.productosRepository.findOne({ 
+                where: { idProducto: id } 
+            });
+
+            if (!producto) {
+                return new BaseResponseDto<null>(
+                    false,
+                    `Producto con ID ${id} no encontrado`,
+                    undefined,
+                    null,
+                    HttpStatus.NOT_FOUND,
+                );
+            }
+
+            await this.productosRepository.remove(producto);
+
+            return new BaseResponseDto<null>(
+                true,
+                'Producto eliminado permanentemente',
+                null,
+                null,
+                HttpStatus.OK,
+            );
+        } catch (error) {
+            return new BaseResponseDto<null>(
+                false,
+                'Error al eliminar permanentemente el producto',
+                undefined,
+                error.message || error,
+                HttpStatus.INTERNAL_SERVER_ERROR,
+            );
+        }
     }
 }

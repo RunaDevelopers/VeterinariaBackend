@@ -13,6 +13,10 @@ import { ReservasModule } from './modules/reservas/reservas.module';
 import { TipoProductoModule } from './modules/tipo-producto/tipo-producto.module';
 import { ProductosModule } from './modules/productos/productos.module';
 import { SharedModule } from './modules/shared/shared.module';
+import { EspeciesModule } from './modules/especies/especies.module';
+import { RazasModule } from './modules/razas/razas.module';
+import { MascotasModule } from './modules/mascotas/mascotas.module';
+import { UsuariosModule } from './modules/usuarios/usuarios.module';
 
 @Module({
   imports: [
@@ -67,6 +71,10 @@ import { SharedModule } from './modules/shared/shared.module';
     ReservasModule,
     TipoProductoModule,
     ProductosModule,
+    EspeciesModule,
+    RazasModule,
+    MascotasModule,
+    UsuariosModule,
 
     // 5. Módulo compartido con servicios generales
     SharedModule,

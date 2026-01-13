@@ -5,22 +5,24 @@ import {
   InternalServerErrorException,
   NotFoundException,
 } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 import { Usuarios } from '../entities/Usuarios';
 import { Roles } from '../entities/Roles';
 import { RegisterDto, LoginDto, AuthResponseDto } from './dto';
 import { JwtPayload } from './strategies/jwt.strategy';
+import { UsuariosService } from '../services/usuarios/usuarios.service';
+import { RolesService } from '../services/roles/roles.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AuthService {
   constructor(
     @InjectRepository(Usuarios)
     private readonly usuariosRepository: Repository<Usuarios>,
-    @InjectRepository(Roles)
-    private readonly rolesRepository: Repository<Roles>,
+    private readonly usuariosService: UsuariosService,
+    private readonly rolesService: RolesService,
     private readonly jwtService: JwtService,
   ) {}
 
@@ -30,21 +32,15 @@ export class AuthService {
   async register(registerDto: RegisterDto): Promise<AuthResponseDto> {
     const { idRol, email, username, password, ...userData } = registerDto;
 
-    // Verificar que el rol existe
-    const rol = await this.rolesRepository.findOne({
-      where: { idRol, activo: true },
-    });
-
-    if (!rol) {
+    // Verificar que el rol existe y está activo usando RolesService
+    const rol = await this.rolesService.findOne(idRol);
+    if (!rol || !rol.activo) {
       throw new NotFoundException('El rol especificado no existe o está inactivo');
     }
 
-    // Verificar si el email ya existe
-    const existingEmail = await this.usuariosRepository.findOne({
-      where: { email },
-    });
-
-    if (existingEmail) {
+    // Verificar si el email ya existe usando UsuariosService
+    const existingEmailResponse = await this.usuariosService.getUsuarioByEmail(email);
+    if (existingEmailResponse.success) {
       throw new ConflictException('El email ya está registrado');
     }
 
@@ -61,7 +57,7 @@ export class AuthService {
       // Hashear la contraseña
       const hashedPassword = await bcrypt.hash(password, 10);
 
-      // Crear el usuario
+      // Crear el usuario usando el repositorio (necesario para tener control del password)
       const usuario = this.usuariosRepository.create({
         idRol,
         email,
@@ -101,7 +97,7 @@ export class AuthService {
   async login(loginDto: LoginDto): Promise<AuthResponseDto> {
     const { username, password } = loginDto;
 
-    // Buscar usuario por username con el rol relacionado
+    // Buscar usuario por username (necesitamos acceso al passwordHash)
     const usuario = await this.usuariosRepository.findOne({
       where: { username },
       relations: ['idRol2'],
@@ -149,6 +145,7 @@ export class AuthService {
    * Validar usuario por ID (usado por JwtStrategy)
    */
   async validateUser(userId: string): Promise<Usuarios> {
+    // Usar UsuariosService pero necesitamos acceso completo al usuario
     const usuario = await this.usuariosRepository.findOne({
       where: { idUsuario: userId, activo: true },
       relations: ['idRol2'],
