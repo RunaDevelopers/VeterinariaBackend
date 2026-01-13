@@ -1,3 +1,4 @@
+export * from './cita-medica.interface';
 export * from './cliente.interface';
 export * from './especie.interface';
 export * from './lead.interface';

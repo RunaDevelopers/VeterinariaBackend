@@ -17,6 +17,7 @@ import { EspeciesModule } from './modules/especies/especies.module';
 import { RazasModule } from './modules/razas/razas.module';
 import { MascotasModule } from './modules/mascotas/mascotas.module';
 import { UsuariosModule } from './modules/usuarios/usuarios.module';
+import { CitasMedicasModule } from './modules/citas-medicas/citas-medicas.module';
 
 @Module({
   imports: [
@@ -75,6 +76,7 @@ import { UsuariosModule } from './modules/usuarios/usuarios.module';
     RazasModule,
     MascotasModule,
     UsuariosModule,
+    CitasMedicasModule,
 
     // 5. Módulo compartido con servicios generales
     SharedModule,
